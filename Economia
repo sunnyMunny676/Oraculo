@@ -1,0 +1,167 @@
+// --- SISTEMA DE FANTASÍA Y ECONOMÍA ---
+const user = msg.key.participant || msg.key.remoteJid
+const now = Date.now()
+
+// Inicializar usuario si no existe
+if (!db[user]) db[user] = { 
+    dinero: 0, 
+    banco: 0, 
+    lastDaily: 0, 
+    lastWork: 0, 
+    lastRob: 0, 
+    streak: 0 
+}
+
+// --- COMANDOS DE ECONOMÍA ---
+
+// 1. DAILY (Con racha)
+if (command === 'daily' || command === 'diarias') {
+    const msIn24h = 86400000
+    const msIn48h = 172800000
+    const timePassed = now - db[user].lastDaily
+
+    if (timePassed < msIn24h) {
+        const remaining = msIn24h - timePassed
+        const hours = Math.floor(remaining / 3600000)
+        return await sock.sendMessage(from, { text: `⏳ Aún no puedes reclamar. Vuelve en ${hours} horas.` })
+    }
+
+    if (timePassed > msIn48h) db[user].streak = 0 
+    
+    db[user].streak += 1
+    const recompensa = 10 + (db[user].streak - 1) * 5
+    db[user].dinero += recompensa
+    db[user].lastDaily = now
+    saveDB()
+
+    await sock.sendMessage(from, { 
+        text: `✨ *DAILY REWARD* ✨\n\n🗓️ Racha: ${db[user].streak} días\n💰 Recibiste: ${recompensa} monedas.\n¡Vuelve mañana por ${recompensa + 5}!` 
+    })
+}
+
+// 2. ROBAR
+if (command === 'robar' || command === 'rob') {
+    const target = msg.message.extendedTextMessage?.contextInfo?.mentionedJid[0]
+    if (!target) return await sock.sendMessage(from, { text: '👤 Etiqueta a alguien para robarle.' })
+    if (now - db[user].lastRob < 600000) return await sock.sendMessage(from, { text: '⏳ Espera 10 minutos.' })
+
+    const exito = Math.random() > 0.65
+    db[user].lastRob = now
+
+    if (exito) {
+        if (db[target].dinero < 35) return await sock.sendMessage(from, { text: 'Es muy pobre, no vale la pena.' })
+        db[target].dinero -= 35
+        db[user].dinero += 35
+        await sock.sendMessage(from, { text: `🥷 ¡Éxito! Robaste 35 monedas a @${target.split('@')[0]}`, mentions: [target] })
+    } else {
+        db[user].dinero -= 10
+        await sock.sendMessage(from, { text: `👮 ¡Te atraparon! Pagaste 10 monedas de multa.` })
+    }
+    saveDB()
+}
+
+// 3. TRABAJAR (15 tareas de fantasía)
+if (command === 'work' || command === 'trabajar') {
+    if (now - db[user].lastWork < 300000) return await sock.sendMessage(from, { text: '⏳ Descansa 5 minutos.' })
+    
+    const trabajos = [
+        'Cazaste un dragón pequeño', 'Limpiaste caballerizas de pegasos', 'Escoltaste mercaderes gnomos', 
+        'Recolectaste hierbas mágicas', 'Forjaste una espada rúnica', 'Espantaste duendes del huerto',
+        'Ayudaste a un alquimista', 'Exploraste una cueva oscura', 'Entrenaste con la guardia real', 
+        'Transcribiste hechizos', 'Pescaste una sirena dorada', 'Cocinaste para enanos',
+        'Domaste a un fénix', 'Recogiste cristales de maná', 'Ahuyentaste a un fantasma'
+    ]
+    const job = trabajos[Math.floor(Math.random() * trabajos.length)]
+    
+    db[user].dinero += 15
+    db[user].lastWork = now
+    saveDB()
+    await sock.sendMessage(from, { text: `⚒️ *AVENTURA:* ${job}.\n💰 Ganaste *15 monedas*.` })
+}
+
+// 4. BANCO Y TRANSFERENCIAS
+if (command === 'depositar' || command === 'dep') {
+    const monto = parseInt(texto.split(' ')[1])
+    if (!monto || monto > db[user].dinero) return await sock.sendMessage(from, { text: '❌ Cantidad inválida.' })
+    db[user].dinero -= monto; db[user].banco += monto
+    saveDB(); await sock.sendMessage(from, { text: `🏦 Guardaste ${monto} monedas.` })
+}
+
+if (command === 'transferir') {
+    const target = msg.message.extendedTextMessage?.contextInfo?.mentionedJid[0]
+    const monto = parseInt(texto.split(' ')[2])
+    if (!target || !monto || db[user].dinero < monto) return await sock.sendMessage(from, { text: 'Uso: .transferir @user 100' })
+    db[user].dinero -= monto
+    if (!db[target]) db[target] = { dinero: 0, banco: 0 }
+    db[target].dinero += monto
+    saveDB(); await sock.sendMessage(from, { text: `💸 Diste ${monto} monedas a @${target.split('@')[0]}`, mentions: [target] })
+}
+
+// 5. PERFIL Y RANGOS
+if (command === 'perfil' || command === 'bal') {
+    const total = db[user].dinero + db[user].banco
+    let rango = 'Vagabundo 🏚️'
+    if (total >= 100) rango = 'Aprendiz ⚔️'
+    if (total >= 500) rango = 'Caballero 🛡️'
+    if (total >= 1500) rango = 'Noble 🏰'
+    if (total >= 5000) rango = 'Rey 👑'
+
+    await sock.sendMessage(from, { 
+        text: `👤 *PERFIL*\n🏅 Rango: ${rango}\n💰 Mano: ${db[user].dinero}\n🏦 Banco: ${db[user].banco}\n🔥 Racha: ${db[user].streak}`, 
+        mentions: [user] 
+    })
+}
+
+// 6. ADMIN ABUSE (Dueño y Admins)
+if (command === 'adminabuse' || command === 'dar') {
+    const groupMetadata = await sock.groupMetadata(from)
+    const admins = groupMetadata.participants.filter(p => p.admin).map(p => p.id)
+    const esAdmin = admins.includes(user)
+    const esDueno = user === '553316913647@s.whatsapp.net'
+
+    if (!esAdmin && !esDueno) return await sock.sendMessage(from, { text: '❌ Solo los líderes pueden usar este poder.' })
+
+    const target = msg.message.extendedTextMessage?.contextInfo?.mentionedJid[0]
+    const monto = parseInt(texto.split(' ')[2])
+    if (!target || !monto) return await sock.sendMessage(from, { text: 'Uso: .dar @user 5000' })
+
+    if (!db[target]) db[target] = { dinero: 0, banco: 0 }
+    db[target].dinero += monto
+    saveDB()
+    await sock.sendMessage(from, { text: `👑 *PODER:* Se otorgaron ${monto} monedas a @${target.split('@')[0]}`, mentions: [target] })
+}
+
+// --- SISTEMA DE LA TABERNA ---
+const tabernaMistica = {
+    'oro': 15, 'rocio': 10, 'te': 5, 'beso': 30, 'velo': 10, 'estelar': 15, 'aliento': 18, 'legado': 15, 'calor': 20,
+    'eclipse': 10, 'esquirlas': 15, 'nebulosa': 10, 'corazones': 17, 'suspiros': 25, 'manzana': 10, 'destilado': 10,
+    'granate': 15, 'latido': 18, 'vena': 30, 'eternidad': 20, 'besovampiro': 20, 'luzsangre': 15,
+    'escudo': 15, 'abrazo': 15, 'legadoreino': 20, 'rugido': 25, 'corazonbosque': 20, 'fuerzalobo': 5,
+    'suspiroprado': 15, 'tesoro': 20, 'suenomadre': 18, 'susurroflores': 18, 'espumacielo': 20, 'alientoprado': 15
+}
+
+if (tabernaMistica[command]) {
+    const precio = tabernaMistica[command]
+    if (db[user].dinero < precio) return await sock.sendMessage(from, { text: `⚠️ Cuesta ${precio} monedas.` })
+    db[user].dinero -= precio
+    saveDB()
+    await sock.sendMessage(from, { text: `✨ *TABERNA:* Consumiste *${command.toUpperCase()}* por ${precio} monedas.` })
+
+// --- COMANDO PARA TRABAJADORES DE LA TABERNA ---
+if (command === 'servir') {
+    // Le damos las 10 monedas
+    db[user].dinero += 10
+    saveDB()
+    
+    const frasesServir = [
+        '🍴 ¡Marchando una orden! Has servido a un aventurero hambriento.',
+        '🍺 ¡Salud! Serviste una ronda de hidromiel perfectamente fría.',
+        '🍳 El chef recomienda el plato de hoy. Ganaste una propina.',
+        '🍷 Serviste una copa del mejor vino de la bodega.',
+        '🥐 ¡Buen provecho! Entregaste el pedido a tiempo.'
+    ]
+    const frase = frasesServir[Math.floor(Math.random() * frasesServir.length)]
+    
+    await sock.sendMessage(from, { text: `${frase}\n💰 Recompensa: *10 monedas* de plata.` })
+}
+}

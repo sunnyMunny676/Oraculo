@@ -1,0 +1,45 @@
+// --- SISTEMA DE INTERACCIONES CON GIFS DE ANIME ---
+        const acciones = {
+            'abrazar': { 
+                texto: 'le dio un gran abrazo a', 
+                gifs: ['https://media.tenor.com/itY9v6p7sAAAAC/anime-hug.gif', 'https://media.tenor.com/0v_vU-v6p7sAAAAC/anime-hug.gif'] 
+            },
+            'golpear': { 
+                texto: 'le dio un golpe a', 
+                gifs: ['https://media.tenor.com/4qy9v8m6p7sAAAAC/anime-punch.gif', 'https://media.tenor.com/E_vV-v6p7sAAAAC/anime-punch.gif'] 
+            },
+            'lengua': { 
+                texto: 'le sacó la lengua a', 
+                gifs: ['https://media.tenor.com/2v_vU-v6p7sAAAAC/anime-tongue.gif', 'https://media.tenor.com/M_vW-v6p7sAAAAC/anime-tongue.gif'] 
+            },
+            'empujar': { 
+                texto: 'empujó a', 
+                gifs: ['https://media.tenor.com/3v_vU-v6p7sAAAAC/anime-push.gif', 'https://media.tenor.com/H_vX-v6p7sAAAAC/anime-shove.gif'] 
+            },
+            'cachetear': { 
+                texto: 'le dio una cachetada a', 
+                gifs: ['https://media.tenor.com/8v_vU-v6p7sAAAAC/anime-slap.gif', 'https://media.tenor.com/9v_vU-v6p7sAAAAC/anime-slap-hard.gif'] 
+            },
+            'besar': { 
+                texto: 'le dio un beso a', 
+                gifs: ['https://media.tenor.com/yv9vX9r8v6AAAAAC/anime-kiss.gif', 'https://media.tenor.com/f0f-v9v6p7sAAAAC/anime-kissing.gif'] 
+            },
+            'matar': { 
+                texto: 'acabó con la vida de', 
+                gifs: ['https://media.tenor.com/1v_vU-v6p7sAAAAC/anime-kill.gif', 'https://media.tenor.com/4v_vU-v6p7sAAAAC/anime-dead.gif'] 
+            }
+        };
+
+        if (acciones[command]) {
+            const acc = acciones[command];
+            const mension = msg.message.extendedTextMessage?.contextInfo?.mentionedJid[0] || msg.key.remoteJid;
+            const autor = msg.pushName || 'Usuario';
+            const gifSeleccionado = acc.gifs[Math.floor(Math.random() * acc.gifs.length)];
+
+            await sock.sendMessage(from, { 
+                video: { url: gifSeleccionado }, 
+                caption: `*${autor}* ${acc.texto} @${mension.split('@')[0]}`,
+                gifPlayback: true, // Esto hace que se vea como GIF y no como video
+                mentions: [mension]
+            });
+        }

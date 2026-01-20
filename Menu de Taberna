@@ -1,0 +1,46 @@
+if (command === 'menutaberna' || command === 'taberna') {
+    const menuTexto = `『 𝓜𝖾𝗇ú 𝖽𝖾 𝗅𝖺 𝓣𝖺𝖻𝖾𝗋𝗇𝖺 𝖽𝖾𝗅 𝓒𝗋𝖾𝗆𝗂𝗈 』
+
+࣭ ⭑ *𝙱𝚎𝚋𝚒𝚍𝚊𝚜 𝙶𝚎𝚗𝚎𝚛𝚊𝚕𝚎𝚜*
+- .oro (Oro de Valhala): 15 Monedas
+- .rocio (Rocío de la Alborada): 10 Monedas
+- .te (Té de Hierbas): 5 Monedas
+- .beso (Beso de la viuda): 30 Monedas
+- .velo (Velo de Erebo): 10 Monedas
+- .estelar (Estelar en Copa): 15 Monedas
+- .aliento (Aliento del Rey): 18 Monedas
+- .legado (Legado de las Uvas): 15 Monedas
+- .calor (Calor del Invierno): 20 Monedas
+
+🦇 *𝙼𝚎𝚗ú 𝚙𝚊𝚛𝚊 𝚅𝚊𝚖𝚙𝚒𝚛𝚘𝚜*
+- .granate (Corazones de Granate): 15 Monedas
+- .latido (Latido Silencioso): 18 Monedas
+- .vena (Vena Escarlata): 30 Monedas
+- .eternidad (Eternidad Carmesí): 20 Monedas
+- .besovampiro (Beso del Vampiro): 20 Monedas
+- .luzsangre (Luz de la Sangre): 15 Monedas
+
+🐺 *𝙼𝚎𝚗ú 𝚙𝚊𝚛𝚊 𝙷𝚘𝚖𝚋𝚛𝚎𝚜 𝙻𝚘𝚋𝚘*
+- .escudo (Escudo del Mar): 15 Monedas
+- .abrazo (Abrazo de la Hearth): 15 Monedas
+- .legadoreino (Legado del Reino): 20 Monedas
+- .rugido (Rugido de Tormenta): 25 Monedas
+- .corazonbosque (Corazón del Bosque): 20 Monedas
+- .fuerzalobo (Fuerza del Lobo): 5 Monedas
+
+🧚 *𝙼𝚎𝚗ú 𝚙𝚊𝚛𝚊 𝙷𝚊𝚍𝚊𝚜*
+- .suspiroprado (Suspiro del Prado): 15 Monedas
+- .tesoro (Tesoro del Bosque): 20 Monedas
+- .suenomadre (Sueño de la Madre): 18 Monedas
+- .susurroflores (Susurro de Flores): 18 Monedas
+- .espumacielo (Espuma del Cielo): 20 Monedas
+- .alientoprado (Aliento del Prado): 15 Monedas
+
+🥗 *𝙲𝚘𝚖𝚒𝚍𝚊 𝙼í𝚜𝚝𝚒𝚌𝚊*
+- .eclipse (Eclipse de Terciopelo): 10 Monedas
+- .esquirlas (Esquirlas de Arrecife): 15 Monedas
+- .nebulosa (Nebulosa en Reposo): 10 Monedas
+- .corazones (Corazones de Gaia): 17 Monedas
+- .suspiros (Suspiros de Psique): 25 Monedas
+- .manzana (Manzana de Escarcha): 10 Monedas
+- .destilado (Destilado de Fulgor): 10 Monedas

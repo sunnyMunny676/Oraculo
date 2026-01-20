@@ -1,16 +1,31 @@
-{
-  "name": "oraculo-bot",
-  "version": "1.0.0",
-  "description": "Bot personal Oráculo",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.5.0",
-    "qrcode-terminal": "^0.12.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "wa-sticker-formatter": "^4.4.4",
-    "fs-extra": "^11.1.1"
-  }
+// --- COMANDO MENÚ PRINCIPAL ---
+if (command === 'menu' || command === 'ayuda') {
+    const menuPrincipal = `✨ 『 𝓞𝓻á𝓬𝓾𝓵𝓸 𝓑𝓸𝓽 - 𝓜𝖾𝗇ú 𝓓𝖾𝗌𝗉𝗅𝖾𝗀𝖺𝖽𝗈 』 ✨
+
+🎭 *𝙰𝙲𝙲𝙸𝙾𝙽𝙴𝚂*
+_Etiqueta a alguien para usar estos comandos_
+• .abrazar @user
+• .golpear @user
+• .lengua @user
+• .empujar @user
+• .cachetear @user
+• .besar @user
+• .matar @user
+
+⚒️ *𝚃𝚁𝙰𝙱𝙰𝙹𝙾𝚂 𝚈 𝙴𝙲𝙾𝙽𝙾𝙼Í𝙰*
+• .daily - Reclama tu recompensa diaria.
+• .work - Realiza una aventura mística (15 monedas).
+• .servir - Trabaja como personal de la taberna (10 monedas).
+• .rob @user - Intenta robar a otro usuario.
+• .perfil / .bal - Mira tu rango y dinero actual.
+• .dep [monto] - Guarda dinero en el banco.
+• .transferir @user [monto] - Envía dinero a un amigo.
+
+🍺 *𝚃𝙰𝙱𝙴𝚁𝙽𝙰 𝙼Í𝚂𝚃𝙸𝙲𝙰*
+• Para ver nuestra selección de bebidas y alimentos mágicos, usa:
+👉 *.taberna* o  *.menutaberna*
+
+⚠️ *Usa el prefijo (.) antes de cada comando.*`
+
+    await sock.sendMessage(from, { text: menuPrincipal })
 }

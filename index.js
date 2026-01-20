@@ -22,6 +22,10 @@ async function conectarWhatsApp() {
         }
     })
 
+    // Mantener vivo en Render
+const http = require('http');
+http.createServer((req, res) => res.end('Oráculo Vivo')).listen(process.env.PORT || 8080);
+
     console.log("Bot encendido y esperando mensajes...")
 }
 

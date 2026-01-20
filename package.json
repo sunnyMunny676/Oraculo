@@ -1,0 +1,13 @@
+{
+  "name": "oraculo-bot",
+  "version": "1.0.0",
+  "description": "Mi propio bot de WhatsApp",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.5.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "oraculo-bot",
+  "version": "1.0.0",
+  "description": "Bot personal Oráculo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.5.0",
+    "qrcode-terminal": "^0.12.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "wa-sticker-formatter": "^4.4.4",
+    "fs-extra": "^11.1.1"
+  }
+}

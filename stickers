@@ -1,0 +1,26 @@
+// --- COMANDO DE STICKERS ---
+        if (command === 's' || command === 'sticker') {
+            const { Sticker, StickerTypes } = require('wa-sticker-formatter')
+            const quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage
+            const mime = (msg.message.imageMessage || quoted?.imageMessage) ? 'image' : null
+
+            if (mime) {
+                const stream = await downloadContentFromMessage(msg.message.imageMessage || quoted.imageMessage, 'image')
+                let buffer = Buffer.from([])
+                for await (const chunk of stream) {
+                    buffer = Buffer.concat([buffer, chunk])
+                }
+
+                const sticker = new Sticker(buffer, {
+                    pack: 'Oráculo Pack', 
+                    author: 'Oráculo Bot',
+                    type: StickerTypes.FULL,
+                    categories: ['🤩', '✨'],
+                    quality: 70
+                })
+
+                await sock.sendMessage(from, await sticker.toMessage())
+            } else {
+                await sock.sendMessage(from, { text: '❌ Por favor, envía una imagen con el comando *.s* o responde a una imagen con ese comando.' })
+            }
+        }

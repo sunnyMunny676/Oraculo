@@ -40,9 +40,39 @@ async function conectarWhatsApp() {
             await sock.sendMessage(from, { text: '🍴 ¡Servicio impecable! Has ganado *10 monedas*.' })
         }
 
-        // Comando Perfil (Para ver el dinero)
+     // --- COMANDO PERFIL MEJORADO ---
         if (command === 'perfil' || command === 'bal') {
-            await sock.sendMessage(from, { text: `👤 *ESTADO:* @${user.split('@')[0]}\n💰 Dinero: ${db[user].dinero}`, mentions: [user] })
+            // Buscamos si mencionaste a alguien, si no, eres tú mismo
+            const mentioned = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
+            const target = mentioned || user
+            
+            // Aseguramos que el usuario tenga datos en la base
+            if (!db[target]) db[target] = { dinero: 0, banco: 0, lastDaily: 0, streak: 0 }
+            
+            const stats = db[target]
+            const total = stats.dinero + (stats.banco || 0)
+            
+            // Intentamos bajar la foto de perfil de WhatsApp
+            let ppUrl
+            try {
+                ppUrl = await sock.profilePictureUrl(target, 'image')
+            } catch {
+                ppUrl = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+            }
+
+            const perfilTexto = `👤 *PERFIL DE USUARIO*
+            
+✨ *Usuario:* @${target.split('@')[0]}
+💰 *En Mano:* ${stats.dinero}
+🏦 *En Banco:* ${stats.banco || 0}
+📊 *Total:* ${total}
+🔥 *Racha:* ${stats.streak || 0} días`
+
+            await sock.sendMessage(from, { 
+                image: { url: ppUrl }, 
+                caption: perfilTexto,
+                mentions: [target] 
+            })
         }
 
         // Menú Taberna

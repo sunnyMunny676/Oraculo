@@ -64,6 +64,33 @@ async function conectarWhatsApp() {
             })
         }
 
+        // --- COMANDO PARA ADMINS: QUITAR MONEDAS ---
+        if (command === 'quitar' || command === 'remover') {
+            if (!from.endsWith('@g.us')) return await sock.sendMessage(from, { text: '❌ Este comando solo funciona en grupos.' })
+
+            const groupMetadata = await sock.groupMetadata(from)
+            const admins = groupMetadata.participants.filter(p => p.admin).map(p => p.id)
+            if (!admins.includes(user)) return await sock.sendMessage(from, { text: '❌ Solo los administradores pueden usar este comando.' })
+
+            const mencionado = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
+            const args = body.trim().split(/ +/)
+            const cantidad = parseInt(args[args.length - 1])
+
+            if (!mencionado || isNaN(cantidad)) {
+                return await sock.sendMessage(from, { text: '⚠️ Uso correcto: *.quitar @usuario 50*' })
+            }
+
+            if (!db[mencionado]) db[mencionado] = { dinero: 0, banco: 0, lastDaily: 0, streak: 0 }
+            db[mencionado].dinero -= cantidad
+            if (db[mencionado].dinero < 0) db[mencionado].dinero = 0 
+            
+            saveDB()
+            await sock.sendMessage(from, { 
+                text: `⚖️ *JUSTICIA DIVINA:* Se le han retirado ${cantidad} monedas a @${mencionado.split('@')[0]}.`, 
+                mentions: [mencionado] 
+            })
+        }
+
         // --- 3. SISTEMA DE COMBATE (PROBABILIDADES) ---
         const accionesCombate = {
             'noquear': { prob: 20, msg: '💤 ¡Has dejado inconsciente a tu oponente!' },

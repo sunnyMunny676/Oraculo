@@ -135,4 +135,14 @@ async function conectarWhatsApp() {
     console.log("✅ Bot configurado. Escanea el QR en los logs de Render.")
 }
 
+// Busca esta línea:
+const sock = makeWASocket({ auth: state, printQRInTerminal: true })
+
+// Y cámbiala por esta (que fuerza la compatibilidad con la terminal de Render):
+const sock = makeWASocket({ 
+    auth: state, 
+    printQRInTerminal: true,
+    browser: ["Oráculo Bot", "Chrome", "1.0.0"] 
+})
+
 conectarWhatsApp()

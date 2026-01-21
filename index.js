@@ -28,31 +28,26 @@ async function conectarWhatsApp() {
         const command = body.slice(1).trim().split(/ +/).shift().toLowerCase()
         const user = msg.key.participant || msg.key.remoteJid
 
-        // Inicializar usuario
-        if (!db[user]) db[user] = { dinero: 0, banco: 0, lastDaily: 0 }
+        // Inicializar usuario en la base
+        if (!db[user]) db[user] = { dinero: 0, banco: 0, lastDaily: 0, streak: 0 }
 
-        // --- 2. COMANDOS ---
+        // --- 2. COMANDOS DE ECONOMÍA ---
 
-        // Comando Servir (El que me pediste)
         if (command === 'servir') {
             db[user].dinero += 10
             saveDB()
             await sock.sendMessage(from, { text: '🍴 ¡Servicio impecable! Has ganado *10 monedas*.' })
         }
 
-     // --- COMANDO PERFIL MEJORADO ---
         if (command === 'perfil' || command === 'bal') {
-            // Buscamos si mencionaste a alguien, si no, eres tú mismo
             const mentioned = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
             const target = mentioned || user
             
-            // Aseguramos que el usuario tenga datos en la base
             if (!db[target]) db[target] = { dinero: 0, banco: 0, lastDaily: 0, streak: 0 }
             
             const stats = db[target]
             const total = stats.dinero + (stats.banco || 0)
             
-            // Intentamos bajar la foto de perfil de WhatsApp
             let ppUrl
             try {
                 ppUrl = await sock.profilePictureUrl(target, 'image')
@@ -60,13 +55,7 @@ async function conectarWhatsApp() {
                 ppUrl = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
             }
 
-            const perfilTexto = `👤 *PERFIL DE USUARIO*
-            
-✨ *Usuario:* @${target.split('@')[0]}
-💰 *En Mano:* ${stats.dinero}
-🏦 *En Banco:* ${stats.banco || 0}
-📊 *Total:* ${total}
-🔥 *Racha:* ${stats.streak || 0} días`
+            const perfilTexto = `👤 *PERFIL DE USUARIO*\n\n✨ *Usuario:* @${target.split('@')[0]}\n💰 *En Mano:* ${stats.dinero}\n🏦 *En Banco:* ${stats.banco || 0}\n📊 *Total:* ${total}\n🔥 *Racha:* ${stats.streak || 0} días`
 
             await sock.sendMessage(from, { 
                 image: { url: ppUrl }, 
@@ -75,7 +64,42 @@ async function conectarWhatsApp() {
             })
         }
 
-        // Menú Taberna
+        // --- 3. SISTEMA DE COMBATE (PROBABILIDADES) ---
+        const accionesCombate = {
+            'noquear': { prob: 20, msg: '💤 ¡Has dejado inconsciente a tu oponente!' },
+            'atrapar': { prob: 40, msg: '🕸️ ¡El enemigo ha quedado atrapado en tu red!' },
+            'golpegrave': { prob: 35, msg: '⚔️ ¡Un impacto devastador! Sangre enemiga ha sido derramada.' },
+            'envenenar': { prob: 40, msg: '🧪 ¡Veneno místico fluye por las venas de tu rival!' },
+            'golpecritico': { prob: 25, msg: '💥 ¡GOLPE CRÍTICO! Has encontrado el punto débil.' },
+            'intimidar': { prob: 15, msg: '👁️ Tu aura oscura ha paralizado de miedo al oponente.' },
+            'pegar': { prob: 50, msg: '👊 ¡Un golpe certero y directo!' },
+            'librar': { prob: 24, msg: '✨ ¡Increíble! Has logrado zafarte del ataque justo a tiempo.' }
+        }
+
+        if (accionesCombate[command]) {
+            const mencion = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
+            if (!mencion && command !== 'librar') {
+                return await sock.sendMessage(from, { text: `❌ Debes etiquetar a alguien para usar .${command}` })
+            }
+
+            const azar = Math.floor(Math.random() * 100) + 1
+            const exito = azar <= accionesCombate[command].prob
+            const objetivo = mencion ? `@${mencion.split('@')[0]}` : ''
+
+            if (exito) {
+                await sock.sendMessage(from, { 
+                    text: `✅ *ÉXITO (${azar}%):* ${accionesCombate[command].msg} ${objetivo}`, 
+                    mentions: mencion ? [mencion] : [] 
+                })
+            } else {
+                await sock.sendMessage(from, { 
+                    text: `❌ *FALLO (${azar}%):* Intentaste usar ${command} contra ${objetivo} pero fallaste.`, 
+                    mentions: mencion ? [mencion] : [] 
+                })
+            }
+        }
+
+        // --- 4. OTROS ---
         if (command === 'taberna') {
             await sock.sendMessage(from, { text: '📜 Usa *.servir* para ganar propinas o pide algo del menú (Próximamente).' })
         }
